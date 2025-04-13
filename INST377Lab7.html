@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 7</title>
+    <style>
+        #loading {
+            display: none;
+        }
+        #results {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Let's Lookup some Books</h1>
+    <h2>Please enter a book name:</h2>
+    <form id="searchForm">
+        <input type="text" id="bookInput" placeholder="Enter book title" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="loading">Please wait while we load the books</div>
+    <table id="results">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Authors</th>
+            </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+    </table>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const bookName = document.getElementById('bookInput').value.replace(/ /g, '+');
+            searchBooks(bookName);
+        });
+
+        function searchBooks(bookName) {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            fetch(`https://openlibrary.org/search.json?title=${bookName}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none';
+                    const resultsBody = document.getElementById('resultsBody');
+                    resultsBody.innerHTML = '';
+                    data.docs.forEach(book => {
+                        const row = `<tr>
+                                        <td>${book.title}</td>
+                                        <td>${book.author_name ? book.author_name.join(', ') : 'N/A'}</td>
+                                    </tr>`;
+                        resultsBody.innerHTML += row;
+                    });
+                    document.getElementById('results').style.display = 'table';
+                })
+                .catch(error => {
+                    document.getElementById('loading').style.display = 'none';
+                    console.error('Error fetching data:', error);
+                });
+        }
+    </script>
+</body>
+</html>
